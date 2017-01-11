@@ -98,14 +98,14 @@ namespace EasyAR {
     }
 }
 EasyAR::samples::HelloAR ar;
-JavaVM *gJavaVM;
-jobject gJavaObj;
+//JavaVM *gJavaVM;
+//jobject gJavaObj;
 
 JNIEXPORT jboolean JNICALL JNIFUNCTION_NATIVE(nativeInit(JNIEnv * env, jobject
                                                       jobj)) {
 
-    (*env).GetJavaVM(&gJavaVM);
-    gJavaObj = (*env).NewGlobalRef(jobj);
+//    (*env).GetJavaVM(&gJavaVM);
+//    gJavaObj = (*env).NewGlobalRef(jobj);
 
     bool status = ar.initCamera();
 //    ar.loadFromJsonFile("targets.json", "argame");
