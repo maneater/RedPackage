@@ -195,7 +195,7 @@ public class CreateTargetActivity extends AppCompatActivity implements SurfaceHo
     private Bitmap targetBitmap = null;
 
     private Bitmap corpBitmap(Bitmap rotatedBitmap) {
-        Log.i(TAG, rotatedBitmap.getWidth() + "|" + rotatedBitmap.getHeight());
+        Log.e(TAG, rotatedBitmap.getWidth() + "|" + rotatedBitmap.getHeight());
         Rect mCropRect = createCropRect();
         return Bitmap.createBitmap(rotatedBitmap, mCropRect.left, mCropRect.top, mCropRect.width(), mCropRect.height());
     }

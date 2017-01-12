@@ -24,6 +24,8 @@ public class ARManager {
 
     private native boolean nativeInit();
 
+    private native void nativeOnScroll(float xOff, float yOff);
+
     private native void nativeLoadTarget(String targetFilePath);
 
     private native void nativeDestroy();
@@ -48,14 +50,19 @@ public class ARManager {
     }
 
     private void onTraceSuccess() {
-        Log.e("------", "Success");
+//        Log.e("------", "Success");
     }
 
     private GLSurfaceView.Renderer renderer = null;
 
     public GLSurfaceView.Renderer getRender() {
         if (renderer == null) {
-            renderer = new GLSurfaceView.Renderer() {
+            renderer = new GLView.TouchRender() {
+                @Override
+                public void onScroll(float xOff, float yOff) {
+                    nativeOnScroll(xOff, yOff);
+                }
+
                 @Override
                 public void onSurfaceCreated(GL10 gl, EGLConfig config) {
                     nativeInitGL();

@@ -17,132 +17,130 @@
 #endif
 
 namespace EasyAR {
-    namespace samples {
 
-        class HelloCallBack : public TargetLoadCallBack {
-        public:
-            virtual ~HelloCallBack() { };
+    class HelloCallBack : public TargetLoadCallBack {
+    public:
+        virtual ~HelloCallBack() { };
 
-            virtual void operator()(const Target target, const bool status) {
-                LOGI("load target: %s (%d) %s\n", target.name(), target.id(),
-                     status ? "success" : "fail");
-                delete this;
-            }
-        };
-
-        AR::AR() {
-            portrait_ = false;
+        virtual void operator()(const Target target, const bool status) {
+            LOGI("load target: %s (%d) %s\n", target.name(), target.id(),
+                 status ? "success" : "fail");
+            delete this;
         }
+    };
 
-        AR::~AR() {
-            clear();
+    AR::AR() {
+        portrait_ = false;
+    }
+
+    AR::~AR() {
+        clear();
+    }
+
+    bool AR::initCamera() {
+        bool status = true;
+        status &= camera_.open();
+        camera_.setSize(Vec2I(1280, 720));
+        status &= tracker_.attachCamera(camera_);
+        tracker_.setSimultaneousNum(4);
+        status &= augmenter_.attachCamera(camera_);
+        return status;
+    }
+
+    void AR::loadFromImage(const std::string &path) {
+        ImageTarget target;
+        std::string jstr = "{\n"
+                                   "  \"images\" :\n"
+                                   "  [\n"
+                                   "    {\n"
+                                   "      \"image\" : \"" + path + "\",\n"
+                                   "      \"name\" : \"" +
+                           path.substr(0, path.find_first_of(".")) + "\"\n"
+                                   "    }\n"
+                                   "  ]\n"
+                                   "}";
+        target.load(jstr.c_str(), EasyAR::kStorageAssets | EasyAR::kStorageJson);
+        tracker_.loadTarget(target, new HelloCallBack());
+    }
+
+    void AR::loadFromFile(const std::string &path) {
+        ImageTarget target;
+        std::string jstr = "{\n"
+                                   "  \"images\" :\n"
+                                   "  [\n"
+                                   "    {\n"
+                                   "      \"image\" : \"" + path + "\",\n"
+                                   "      \"name\" : \"" +
+                           path.substr(0, path.find_first_of(".")) + "\"\n"
+                                   "    }\n"
+                                   "  ]\n"
+                                   "}";
+        target.load(jstr.c_str(), EasyAR::kStorageAbsolute | EasyAR::kStorageJson);
+        tracker_.loadTarget(target, new HelloCallBack());
+    }
+
+    void AR::loadFromJsonFile(const std::string &path, const std::string &targetname) {
+        ImageTarget target;
+        target.load(path.c_str(), EasyAR::kStorageAssets, targetname.c_str());
+        tracker_.loadTarget(target, new HelloCallBack());
+    }
+
+    void AR::loadAllFromJsonFile(const std::string &path) {
+        TargetList targets = ImageTarget::loadAll(path.c_str(), EasyAR::kStorageAssets);
+        for (int i = 0; i < targets.size(); ++i) {
+            tracker_.loadTarget(targets[i], new HelloCallBack());
         }
+    }
 
-        bool AR::initCamera() {
-            bool status = true;
-            status &= camera_.open();
-            camera_.setSize(Vec2I(1280, 720));
-            status &= tracker_.attachCamera(camera_);
-            tracker_.setSimultaneousNum(4);
-            status &= augmenter_.attachCamera(camera_);
-            return status;
-        }
+    bool AR::start() {
+        bool status = true;
+        status &= camera_.start();
+        camera_.setFocusMode(CameraDevice::kFocusModeContinousauto);
+        status &= tracker_.start();
+        return status;
+    }
 
-        void AR::loadFromImage(const std::string &path) {
-            ImageTarget target;
-            std::string jstr = "{\n"
-                                       "  \"images\" :\n"
-                                       "  [\n"
-                                       "    {\n"
-                                       "      \"image\" : \"" + path + "\",\n"
-                                       "      \"name\" : \"" +
-                               path.substr(0, path.find_first_of(".")) + "\"\n"
-                                       "    }\n"
-                                       "  ]\n"
-                                       "}";
-            target.load(jstr.c_str(), EasyAR::kStorageAssets | EasyAR::kStorageJson);
-            tracker_.loadTarget(target, new HelloCallBack());
-        }
+    bool AR::stop() {
+        bool status = true;
+        status &= tracker_.stop();
+        status &= camera_.stop();
+        return status;
+    }
 
-        void AR::loadFromFile(const std::string &path) {
-            ImageTarget target;
-            std::string jstr = "{\n"
-                                       "  \"images\" :\n"
-                                       "  [\n"
-                                       "    {\n"
-                                       "      \"image\" : \"" + path + "\",\n"
-                                       "      \"name\" : \"" +
-                               path.substr(0, path.find_first_of(".")) + "\"\n"
-                                       "    }\n"
-                                       "  ]\n"
-                                       "}";
-            target.load(jstr.c_str(), EasyAR::kStorageAbsolute | EasyAR::kStorageJson);
-            tracker_.loadTarget(target, new HelloCallBack());
-        }
+    bool AR::clear() {
+        bool status = true;
+        status &= stop();
+        status &= camera_.close();
+        camera_.clear();
+        tracker_.clear();
+        augmenter_.clear();
+        return status;
+    }
 
-        void AR::loadFromJsonFile(const std::string &path, const std::string &targetname) {
-            ImageTarget target;
-            target.load(path.c_str(), EasyAR::kStorageAssets, targetname.c_str());
-            tracker_.loadTarget(target, new HelloCallBack());
-        }
+    void AR::resizeGL(int width, int height) {
+        Vec2I size = Vec2I(1, 1);
+        if (camera_.isOpened())
+            size = camera_.size();
+        if (size[0] == 0 || size[1] == 0)
+            return;
+        if (portrait_)
+            std::swap(size[0], size[1]);
+        float scaleRatio = std::max((float) width / (float) size[0],
+                                    (float) height / (float) size[1]);
+        Vec2I viewport_size = Vec2I((int) (size[0] * scaleRatio), (int) (size[1] * scaleRatio));
+        viewport_ = Vec4I(0, height - viewport_size[1], viewport_size[0], viewport_size[1]);
+    }
 
-        void AR::loadAllFromJsonFile(const std::string &path) {
-            TargetList targets = ImageTarget::loadAll(path.c_str(), EasyAR::kStorageAssets);
-            for (int i = 0; i < targets.size(); ++i) {
-                tracker_.loadTarget(targets[i], new HelloCallBack());
-            }
-        }
-
-        bool AR::start() {
-            bool status = true;
-            status &= camera_.start();
-            camera_.setFocusMode(CameraDevice::kFocusModeContinousauto);
-            status &= tracker_.start();
-            return status;
-        }
-
-        bool AR::stop() {
-            bool status = true;
-            status &= tracker_.stop();
-            status &= camera_.stop();
-            return status;
-        }
-
-        bool AR::clear() {
-            bool status = true;
-            status &= stop();
-            status &= camera_.close();
-            camera_.clear();
-            tracker_.clear();
-            augmenter_.clear();
-            return status;
-        }
-
-        void AR::resizeGL(int width, int height) {
-            Vec2I size = Vec2I(1, 1);
-            if (camera_.isOpened())
-                size = camera_.size();
-            if (size[0] == 0 || size[1] == 0)
-                return;
-            if (portrait_)
-                std::swap(size[0], size[1]);
-            float scaleRatio = std::max((float) width / (float) size[0],
-                                        (float) height / (float) size[1]);
-            Vec2I viewport_size = Vec2I((int) (size[0] * scaleRatio), (int) (size[1] * scaleRatio));
-            viewport_ = Vec4I(0, height - viewport_size[1], viewport_size[0], viewport_size[1]);
-        }
-
-        void AR::initGL() {
-
-        }
-
-        bool AR::render() {
-
-        }
-
-        void AR::setPortrait(bool portrait) {
-            portrait_ = portrait;
-        }
+    void AR::initGL() {
 
     }
+
+    bool AR::render() {
+
+    }
+
+    void AR::setPortrait(bool portrait) {
+        portrait_ = portrait;
+    }
+
 }

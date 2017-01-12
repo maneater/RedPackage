@@ -12,6 +12,8 @@ import com.maneater.ar.CreateTargetActivity;
 
 import java.io.File;
 
+import cn.easyar.samples.helloarmultitargetst.camera.CameraActivity;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -21,7 +23,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickCreate(View view) {
-        CreateTargetActivity.launch(MainActivity.this, 1);
+//        CreateTargetActivity.launch(MainActivity.this, 1);
+        CameraActivity.launch(MainActivity.this,1);
     }
 
     public void onClickFind(View view) {

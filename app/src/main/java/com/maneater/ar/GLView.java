@@ -9,6 +9,7 @@ package com.maneater.ar;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.support.v4.view.MotionEventCompat;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -23,9 +24,24 @@ public class GLView extends GLSurfaceView {
         setEGLConfigChooser(new ConfigChooser());
     }
 
+    interface TouchRender extends Renderer {
+        void onScroll(float xOff, float yOff);
+    }
+
     @Override
     public void setRenderer(Renderer renderer) {
+        if (renderer instanceof TouchRender) {
+            this.setTouchRenderer((TouchRender) renderer);
+        } else {
+            super.setRenderer(renderer);
+        }
+    }
+
+    private TouchRender touchRender = null;
+
+    public void setTouchRenderer(TouchRender renderer) {
         super.setRenderer(renderer);
+        touchRender = renderer;
     }
 
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
@@ -48,17 +64,21 @@ public class GLView extends GLSurfaceView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        Log.d("Render", event.toString());
         int action = MotionEventCompat.getActionMasked(event);
         if (action == MotionEvent.ACTION_MOVE) {
-
-
+            if (touchRender != null) {
+                touchRender.onScroll(event.getX() - mPreX, event.getY() - mPreY);
+            }
+            mPreX = event.getX();
+            mPreY = event.getY();
         } else if (action == MotionEvent.ACTION_DOWN) {
             mPreX = event.getX();
             mPreY = event.getY();
         } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
 
         }
-        return super.onTouchEvent(event);
+        return true;
     }
 
     private static class ConfigChooser implements GLSurfaceView.EGLConfigChooser {

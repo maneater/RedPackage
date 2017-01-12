@@ -22,82 +22,91 @@ JNIEXPORT void JNICALL JNIFUNCTION_NATIVE(nativeResizeGL(JNIEnv * env, jobject
                                                   object, jint
                                                   w, jint
                                                   h));
+JNIEXPORT void JNICALL JNIFUNCTION_NATIVE(nativeOnScroll(JNIEnv * env, jobject
+                                                  object, jfloat
+                                                  xOff, jfloat
+                                                  yOff));
 JNIEXPORT jboolean JNICALL JNIFUNCTION_NATIVE(nativeRender(JNIEnv * env, jobject
                                                       obj));
 JNIEXPORT void JNICALL JNIFUNCTION_NATIVE(nativeRotationChange(JNIEnv * env, jobject
                                                   obj, jboolean
                                                   portrait));
 JNIEXPORT void JNICALL JNIFUNCTION_NATIVE(nativeLoadTarget(JNIEnv * env, jobject
-                                                  instance,
-                                                          jstring
+                                                  instance, jstring
                                                   targetFilePath_));
+
 };
 
 namespace EasyAR {
-    namespace samples {
 
-        class HelloAR : public AR {
-        public:
-            HelloAR();
+    class HelloAR : public AR {
+    public:
+        HelloAR();
 
-            virtual void initGL();
+        virtual void initGL();
 
-            virtual void resizeGL(int width, int height);
+        virtual void resizeGL(int width, int height);
 
-            virtual bool render();
+        virtual bool render();
 
-        private:
-            Vec2I view_size;
-            Renderer renderer;
-        };
+        void onScroll(float xOff, float yOff);
 
-        HelloAR::HelloAR() {
-            view_size[0] = -1;
-        }
+    private:
+        Vec2I view_size;
+        Renderer renderer;
+    };
 
-        void HelloAR::initGL() {
-            renderer.init();
-            augmenter_ = Augmenter();
-            augmenter_.attachCamera(camera_);
-        }
-
-        void HelloAR::resizeGL(int width, int height) {
-            view_size = Vec2I(width, height);
-        }
-
-        bool HelloAR::render() {
-            glClearColor(0.f, 0.f, 0.f, 1.f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            Frame frame = augmenter_.newFrame();
-            if (view_size[0] > 0) {
-                AR::resizeGL(view_size[0], view_size[1]);
-                if (camera_ && camera_.isOpened())
-                    view_size[0] = -1;
-            }
-            augmenter_.setViewPort(viewport_);
-            augmenter_.drawVideoBackground();
-            glViewport(viewport_[0], viewport_[1], viewport_[2], viewport_[3]);
-
-            bool result = 0;
-
-            for (int i = 0; i < frame.targets().size(); ++i) {
-                AugmentedTarget::Status status = frame.targets()[i].status();
-                if (status == AugmentedTarget::kTargetStatusTracked) {
-                    result++;
-                    Matrix44F projectionMatrix = getProjectionGL(camera_.cameraCalibration(), 0.2f,
-                                                                 500.f);
-                    Matrix44F cameraview = getPoseGL(frame.targets()[i].pose());
-                    ImageTarget target = frame.targets()[i].target().cast_dynamic<ImageTarget>();
-                    renderer.render(projectionMatrix, cameraview, target.size());
-                }
-            }
-            return result;
-        }
-
+    HelloAR::HelloAR() {
+        view_size[0] = -1;
     }
+
+    void HelloAR::initGL() {
+        renderer.init();
+        augmenter_ = Augmenter();
+        augmenter_.attachCamera(camera_);
+    }
+
+    void HelloAR::resizeGL(int width, int height) {
+        view_size = Vec2I(width, height);
+    }
+
+    bool HelloAR::render() {
+        glClearColor(0.f, 0.f, 0.f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        Frame frame = augmenter_.newFrame();
+        if (view_size[0] > 0) {
+            AR::resizeGL(view_size[0], view_size[1]);
+            if (camera_ && camera_.isOpened())
+                view_size[0] = -1;
+        }
+        augmenter_.setViewPort(viewport_);
+        augmenter_.drawVideoBackground();
+        glViewport(viewport_[0], viewport_[1], viewport_[2], viewport_[3]);
+
+        bool result = 0;
+
+        for (int i = 0; i < frame.targets().size(); ++i) {
+            AugmentedTarget::Status status = frame.targets()[i].status();
+            if (status == AugmentedTarget::kTargetStatusTracked) {
+                result = 1;
+                Matrix44F projectionMatrix = getProjectionGL(camera_.cameraCalibration(), 0.2f,
+                                                             500.f);
+                Matrix44F cameraview = getPoseGL(frame.targets()[i].pose());
+                ImageTarget target = frame.targets()[i].target().cast_dynamic<ImageTarget>();
+                renderer.render(projectionMatrix, cameraview, target.size());
+            }
+        }
+        return result;
+    }
+
+    void HelloAR::onScroll(float xOff, float yOff) {
+        renderer.onScroll(xOff, yOff);
+    }
+
+
 }
-EasyAR::samples::HelloAR ar;
+EasyAR::HelloAR ar;
 //JavaVM *gJavaVM;
 //jobject gJavaObj;
 
@@ -131,6 +140,12 @@ JNIEXPORT void JNICALL JNIFUNCTION_NATIVE(nativeResizeGL(JNIEnv * , jobject, jin
                                                   w, jint
                                                   h)) {
     ar.resizeGL(w, h);
+}
+
+JNIEXPORT void JNICALL JNIFUNCTION_NATIVE(nativeOnScroll(JNIEnv * , jobject, jfloat
+                                                  xOff, jfloat
+                                                  yOff)) {
+    ar.onScroll(xOff, yOff);
 }
 
 JNIEXPORT jboolean JNICALL JNIFUNCTION_NATIVE(nativeRender(JNIEnv * jniEnv, jobject

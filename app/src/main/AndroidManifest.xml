@@ -29,6 +29,10 @@
             android:name=".FindTargetActivity"
             android:screenOrientation="portrait">
         </activity>
+        <activity
+            android:name=".camera.CameraActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/FullScreen"/>
     </application>
 
 </manifest>

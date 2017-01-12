@@ -16,45 +16,44 @@
 #include <string>
 
 namespace EasyAR {
-    namespace samples {
 
-        class AR {
-        public:
-            AR();
+    class AR {
+    public:
+        AR();
 
-            virtual ~AR();
+        virtual ~AR();
 
-            virtual bool initCamera();
+        virtual bool initCamera();
 
-            virtual void loadFromImage(const std::string &path);
-            virtual void loadFromFile(const std::string &path);
+        virtual void loadFromImage(const std::string &path);
 
-            virtual void loadFromJsonFile(const std::string &path, const std::string &targetname);
+        virtual void loadFromFile(const std::string &path);
 
-            virtual void loadAllFromJsonFile(const std::string &path);
+        virtual void loadFromJsonFile(const std::string &path, const std::string &targetname);
 
-            virtual bool start();
+        virtual void loadAllFromJsonFile(const std::string &path);
 
-            virtual bool stop();
+        virtual bool start();
 
-            virtual bool clear();
+        virtual bool stop();
 
-            virtual void initGL();
+        virtual bool clear();
 
-            virtual void resizeGL(int width, int height);
+        virtual void initGL();
 
-            virtual bool render();
+        virtual void resizeGL(int width, int height);
 
-            void setPortrait(bool portrait);
+        virtual bool render();
 
-        protected:
-            CameraDevice camera_;
-            ImageTracker tracker_;
-            Augmenter augmenter_;
-            bool portrait_;
-            Vec4I viewport_;
-        };
+        void setPortrait(bool portrait);
 
-    }
+    protected:
+        CameraDevice camera_;
+        ImageTracker tracker_;
+        Augmenter augmenter_;
+        bool portrait_;
+        Vec4I viewport_;
+    };
+
 }
 #endif
