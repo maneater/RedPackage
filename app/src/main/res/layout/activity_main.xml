@@ -36,6 +36,19 @@
         android:onClick="onClickFind"
         android:text="Find"/>
 
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/button2"
+        android:onClick="onClick3D"
+        android:text="3D"/>
+
+
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="120dp"

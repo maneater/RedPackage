@@ -148,11 +148,11 @@ namespace EasyAR {
         float angle = yOff * (360.0f / 800.0f);
 //        __android_log_print(ANDROID_LOG_DEBUG, "Render", "yOff  %f angle %f", yOff, angle);
 
-        transMatrix4.set(cameraview.data);
-        transMatrix4.rotate(angle, 0, 0, 1);
-        glUniformMatrix4fv(pos_trans_box, 1, 0, transMatrix4.get());
+//        transMatrix4.set(cameraview.data);
+//        transMatrix4.rotate(angle, 0, 0, 1);
+//        glUniformMatrix4fv(pos_trans_box, 1, 0, transMatrix4.get());
 
-//        glUniformMatrix4fv(pos_trans_box, 1, 0, cameraview.data);
+        glUniformMatrix4fv(pos_trans_box, 1, 0, cameraview.data);
         glUniformMatrix4fv(pos_proj_box, 1, 0, projectionMatrix.data);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_faces_box);

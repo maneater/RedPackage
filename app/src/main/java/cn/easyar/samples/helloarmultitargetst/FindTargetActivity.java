@@ -9,15 +9,24 @@ package cn.easyar.samples.helloarmultitargetst;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 import com.maneater.ar.ARManager;
 import com.maneater.ar.GLView;
+import com.maneater.ar.ImageView3D;
 
 import java.io.File;
 
@@ -36,6 +45,7 @@ public class FindTargetActivity extends AppCompatActivity {
     static String key = "PEMgJBOg6BWttMXFRVwOYVWyRvZlqWGgWgLUOFHAN4bgsVRzITJotRxpiezkPP265WJuTKzIE1eoW7gWnVnNacGXPJD9dMuFFzKM19556e43853a5931c980c43727b9eac70o0xNywsU6Nh4i90vZRYTMvuZwionTLWJ4ttB5Sov0hneahtp7Ta7qy5u5m6th3JOfpI";
 
     ARManager arManager = null;
+    private boolean isSuccess = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +55,32 @@ public class FindTargetActivity extends AppCompatActivity {
 
         arManager = new ARManager(this, key);
         arManager.init();
-
+        arManager.setTraceSuccessListener(new ARManager.TraceSuccessListener() {
+            @Override
+            public void onSuccess() {
+                if (!isSuccess) {
+                    isSuccess = true;
+                    Log.e("success", "======================");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            AnimationDrawable animationDrawable = (AnimationDrawable) getResources().getDrawable(R.drawable.success_animate_drawable);
+                            ImageView view = (ImageView) findViewById(R.id.vSuccessAnimate);
+                            view.setImageDrawable(animationDrawable);
+                            animationDrawable.start();
+                        }
+                    });
+//                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            ImageView3D imageView3D = (ImageView3D) findViewById(R.id.vImageView3d);
+//                            imageView3D.setVisibility(View.VISIBLE);
+//                            imageView3D.startAuto();
+//                        }
+//                    }, 1000);
+                }
+            }
+        });
 
         arManager.loadTarget(getIntent().getStringExtra("file"));
 

@@ -32,7 +32,7 @@ namespace EasyAR {
         unsigned int vbo_color_box;
         unsigned int vbo_color_box_2;
         unsigned int vbo_faces_box;
-        Matrix4 transMatrix4 = Matrix4();
+//        Matrix4 transMatrix4 = Matrix4();
     };
 
 }

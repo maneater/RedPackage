@@ -15,6 +15,9 @@ public class ARManager {
         System.loadLibrary("helloar");
     }
 
+    public interface TraceSuccessListener {
+        void onSuccess();
+    }
 
     private native void nativeInitGL();
 
@@ -38,6 +41,7 @@ public class ARManager {
     }
 
     public void onDestroy() {
+        traceSuccessListener = null;
         nativeDestroy();
     }
 
@@ -49,8 +53,16 @@ public class ARManager {
         EasyAR.onPause();
     }
 
+    private TraceSuccessListener traceSuccessListener = null;
+
+    public void setTraceSuccessListener(TraceSuccessListener traceSuccessListener) {
+        this.traceSuccessListener = traceSuccessListener;
+    }
+
     private void onTraceSuccess() {
-//        Log.e("------", "Success");
+        if (traceSuccessListener != null) {
+            traceSuccessListener.onSuccess();
+        }
     }
 
     private GLSurfaceView.Renderer renderer = null;

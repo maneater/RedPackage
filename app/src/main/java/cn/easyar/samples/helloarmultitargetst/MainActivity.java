@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickCreate(View view) {
 //        CreateTargetActivity.launch(MainActivity.this, 1);
-        CameraActivity.launch(MainActivity.this,1);
+        CameraActivity.launch(MainActivity.this, 1);
     }
 
     public void onClickFind(View view) {
@@ -33,6 +33,10 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(getApplicationContext(), "Please Create Target", Toast.LENGTH_LONG).show();
         }
+    }
+
+    public void onClick3D(View view) {
+        startActivity(new Intent(this, Image3DActivity.class));
     }
 
 
